@@ -4,31 +4,56 @@
 #include <algorithm>
 #include <utility>
 
+// Dynamic approach - solve the stacks from bottom to top
+// Choose all possible ways, but make a choice every time when solving one 
+// search if an optimal solution has already been found in the solutions map
+// Return the optimal approach
+
 using Pair = std::pair<int, int>;
+using MapIter = std::map<Pair, int>::iterator;
 
 std::map<Pair, int> solutionCache;
 
-int SolutionLookup(const Pair & inPair, const int score)
+bool SolutionLookup(const Pair & inPair, int & score)
 {
     auto it = solutionCache.find(inPair);
     if ( solutionCache.cend() != it)
     {
-        return std::get<1> (*it);
+        score = std::get<1> (*it);
+        return true;
     }
     else
     {
-        solutionCache.emplace(std::make_pair(inPair, score));
-        return score;
+        return false;
     }
+}
+
+bool PlaceSolution(const Pair & inPair, const int score)
+{
+    MapIter iter;
+    if ( (iter = solutionCache.find( inPair )) != solutionCache.cend() )
+    {
+        if (std::get<1> (*iter) > score)
+        {
+            solutionCache.emplace( std::make_pair(inPair, score) );
+        }
+    }
+    else
+    {
+        solutionCache.emplace( std::make_pair(inPair, score) ); 
+    }
+    
 }
 
 int SolveStack(const int * pLS, const int * pRS, const int lSize, const int rSize, int maxSum)
 {
-    int lastLeft = lSize - 1;
-    int lastRight = rSize - 1;
+    assert(!"not implemented");
+    int lastLeft = lSize;
+    int lastRight = rSize;
     int currentSum = 0;
     printf("Starting at %i %i\n", lastLeft, lastRight);
-
+    if (lastLeft < 0 || lastRight < 0)
+        return -1;
 }
 
 int GreedyStack(const int * pLS, const int * pRS, const size_t lssize, const size_t rssize, const long int maxval)
