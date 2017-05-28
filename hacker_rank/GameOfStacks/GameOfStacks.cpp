@@ -1,30 +1,31 @@
-#include <iostream>
-#include <map>
-#include <vector>
-#include <algorithm>
-#include <utility>
+#include "GameOfStacks.h"
 
 // Dynamic approach - solve the stacks from bottom to top
 // Choose all possible ways, but make a choice every time when solving one 
 // search if an optimal solution has already been found in the solutions map
 // Return the optimal approach
 
-using Pair = std::pair<int, int>;
-using MapIter = std::map<Pair, int>::iterator;
+namespace stacks
+{
 
-std::map<Pair, int> solutionCache;
+static std::map<Pair, int> solutionCache;
 
-bool SolutionLookup(const Pair & inPair, int & score)
+bool SolutionExists(const Pair & inPair)
+{
+    auto it = solutionCache.find(inPair);
+    return (solutionCache.cend() != it);
+}
+
+int SolutionLookup(const Pair & inPair, int & score)
 {
     auto it = solutionCache.find(inPair);
     if ( solutionCache.cend() != it)
     {
-        score = std::get<1> (*it);
-        return true;
+        return std::get<1> (*it);
     }
     else
     {
-        return false;
+        return -1;
     }
 }
 
@@ -51,9 +52,24 @@ int SolveStack(const int * pLS, const int * pRS, const int lSize, const int rSiz
     int lastLeft = lSize;
     int lastRight = rSize;
     int currentSum = 0;
+    int score = 0;
     printf("Starting at %i %i\n", lastLeft, lastRight);
     if (lastLeft < 0 || lastRight < 0)
         return -1;
+
+    // iterate through possible solutions
+    for (int i = 0 ; i < lSize ; i++)
+    {
+        for (int j = 0 ; j < rSize ; j++)
+        {
+
+        }
+    }
+}
+
+int SolveStacks(const int * pLS, const int * pRS, const int lSize, const int rSize, int maxSum)
+{
+
 }
 
 int GreedyStack(const int * pLS, const int * pRS, const size_t lssize, const size_t rssize, const long int maxval)
@@ -100,6 +116,7 @@ int GreedyStack(const int * pLS, const int * pRS, const size_t lssize, const siz
     } 
     return scoreTrack;
 }
+}
 
 int main()
 {
@@ -122,7 +139,7 @@ int main()
            scanf( "%d", &b[b_i] );
         }
 
-        printf("%i\n", GreedyStack(a, b, n, m, x));
+        printf("%i\n", stacks::GreedyStack(a, b, n, m, x));
         // your code goes here
         free(a);
         free(b);
