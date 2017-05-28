@@ -10,13 +10,23 @@ namespace stacks
 
 static std::map<Pair, int> solutionCache;
 
-bool SolutionExists(const Pair & inPair)
+static int maxScore = 0;
+
+bool SolutionExists(const Pair & inPair, int & score)
 {
     auto it = solutionCache.find(inPair);
-    return (solutionCache.cend() != it);
+    if ( solutionCache.cend() != it)
+    {
+        score = std::get<1> (*it);
+        return true;
+    }
+    else
+    {
+        return false;
+    }    
 }
 
-int SolutionLookup(const Pair & inPair, int & score)
+int SolutionLookup(const Pair & inPair)
 {
     auto it = solutionCache.find(inPair);
     if ( solutionCache.cend() != it)
@@ -46,76 +56,69 @@ bool PlaceSolution(const Pair & inPair, const int score)
     
 }
 
-int SolveStack(const int * pLS, const int * pRS, const int lSize, const int rSize, int maxSum)
+int SolveStack( const int * pLS, const int * pRS, 
+                const int lSize, const int rSize, 
+                int lastLeft, int lastRight, 
+                int sum, int score, int maxSum)
 {
-    assert(!"not implemented");
-    int lastLeft = lSize;
-    int lastRight = rSize;
-    int currentSum = 0;
-    int score = 0;
-    printf("Starting at %i %i\n", lastLeft, lastRight);
-    if (lastLeft < 0 || lastRight < 0)
-        return -1;
+    int tmpScore = 0;
+    // printf("#########\nStarting at %i %i\n", lastLeft, lastRight);
+    //printf("sum: %d score: %d\n", sum, score);
+    if (maxSum < sum)
+    {
+        // printf("maxSum %d < sum %d score: %d \n", maxSum, sum, score);
+        PlaceSolution(std::make_pair(lastLeft, lastRight), score);
+        return 0;
+    }
+
 
     // iterate through possible solutions
-    for (int i = 0 ; i < lSize ; i++)
+    if ( SolutionExists( std::make_pair(lastLeft, lastRight), tmpScore)  )
     {
-        for (int j = 0 ; j < rSize ; j++)
+        // printf("Solution %d < %d\n", tmpScore, score);
+        if ( tmpScore < score )
         {
-
+            // printf("Placing better solution %d < %d\n", tmpScore, score);
+            PlaceSolution(std::make_pair(lastLeft, lastRight), score);
+        }
+        else
+        {
+            // printf("Solution exists and is better than current %d >= %d\n", tmpScore, score);
+            return -1;
         }
     }
+    else
+    {
+        PlaceSolution(std::make_pair(lastLeft, lastRight), score);
+    }
+
+    if (lastLeft > 0)
+    {
+        // printf("Recursive left: %d %d\n", lastLeft, lastRight);
+        SolveStack(pLS, pRS, lSize, rSize,  lastLeft - 1, lastRight, sum + pLS[lastLeft], score + 1, maxSum);
+    }
+
+    if (lastRight > 0)
+    {
+        // printf("Recursive right: %d %d\n", lastLeft, lastRight);
+        SolveStack(pLS, pRS, lSize, rSize,  lastLeft, lastRight - 1, sum + pRS[lastRight], score + 1, maxSum);
+    }
+    
+    if (lastLeft < 0 && lastRight < 0)
+        PlaceSolution(std::make_pair(lastLeft, lastRight), score);
+
+    maxScore = score > maxScore ? score : maxScore;
 }
 
 int SolveStacks(const int * pLS, const int * pRS, const int lSize, const int rSize, int maxSum)
 {
-
+    SolveStack(pLS, pRS, lSize, rSize, lSize - 1, rSize - 1, 0, 0, maxSum);
+    auto it = solutionCache.find(std::make_pair(lSize - 1, rSize - 1));
+    assert(solutionCache.cend() != it);
+    return std::get<1> (*it);
 }
 
-int GreedyStack(const int * pLS, const int * pRS, const size_t lssize, const size_t rssize, const long int maxval)
-{
-    int scoreTrack = 0;
-    long int sum = 0;
-    int lPos = 0;
-    int rPos = 0;
-    while (lPos < lssize && rPos < rssize)
-    {
-        if ( pLS[lPos] < pRS[rPos] )
-        {
-            sum += pLS[lPos++];
-        }
-        else
-        {
-            sum += pRS[rPos++];
-        }
 
-        if (sum <= maxval)
-            scoreTrack++;
-        else
-            break;
-    }
-
-    while (lPos < lssize)
-    {
-        sum += pLS[lPos++];
-
-        if (sum <= maxval)
-            scoreTrack++;
-        else
-            break;
-    }   
-
-    while (rPos < rssize)
-    {
-        sum += pRS[rPos++];
-
-        if (sum <= maxval)
-            scoreTrack++;
-        else
-            break;
-    } 
-    return scoreTrack;
-}
 }
 
 int main()
@@ -128,6 +131,7 @@ int main()
         int m; 
         int x; 
         scanf( "%d %d %d", &n ,&m ,&x );
+        //printf("g: %d, n: %d, m: %d, x: %d\n", g, n, m, x);
         int *a = (int*) malloc( sizeof(int) * n );
         for(int a_i = 0; a_i < n; a_i++)
         {
@@ -139,10 +143,13 @@ int main()
            scanf( "%d", &b[b_i] );
         }
 
-        printf("%i\n", stacks::GreedyStack(a, b, n, m, x));
+        stacks::SolveStacks(a, b, n, m, x);
+        printf("%i\n", stacks::maxScore);
         // your code goes here
         free(a);
         free(b);
+        stacks::maxScore = 0;
+        stacks::solutionCache.clear();
     }
     return 0;
 }
