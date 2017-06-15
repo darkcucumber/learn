@@ -25,7 +25,7 @@ void Handler(int signal)
 	printf("Calling handler for %d characters\n", CHARS);
  	char c;
  	while ((c = getchar()) != EOF && c != '\n')
- 		printf("%c");
+ 		printf("%c", c);
  	printf("\n");
 
 }
