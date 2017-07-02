@@ -6,7 +6,9 @@ function PrintBuzz(i)
 	if (i % 5 == 0) then
 		io.write("Buzz")
 	end
-	io.write("\n")
+	if ( ((i % 3) == 0) or ((i % 5) == 0)) then
+		io.write("\n")
+	end
 end
 
 for i=1, 100, 1 do
